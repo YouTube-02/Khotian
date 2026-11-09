@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>জমির হিসাব ক্যালকুলেটর</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px 12px;
+  font-family: Arial, sans-serif;
+  background: #f3f6fa;
+  color: #172033;
+}
+
+.container {
+  max-width: 850px;
+  margin: 20px auto;
+  padding: 18px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 5px 25px rgba(0,0,0,.06);
+}
+
+h2 {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 22px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #718096;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+
+label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  outline: none;
+  font: inherit;
+  font-size: 15px;
+  color: #172033;
+  background: white;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #2563eb;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #64748b;
+}
+
+.khatian {
+  display: grid;
+  grid-template-columns: 1.15fr .7fr .75fr 1.15fr;
+  min-width: 620px;
+}
+
+.column {
+  min-width: 0;
+  border-right: 1px solid #64748b;
+}
+
+.column:last-child {
+  border-right: 0;
+}
+
+.column-heading {
+  min-height: 65px;
+  padding: 9px 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.5;
+  border-bottom: 1px solid #64748b;
+}
+
+.column-heading small {
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.column textarea {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  padding: 12px 7px;
+  border: 0;
+  border-radius: 0;
+  resize: vertical;
+  outline: none;
+  font-size: 15px;
+  line-height: 2.4;
+  text-align: center;
+  white-space: pre;
+  overflow-wrap: normal;
+  background: transparent;
+}
+
+.column textarea:focus {
+  background: #f8fbff;
+  box-shadow: inset 0 0 0 1px #93c5fd;
+}
+
+.total-footer {
+  padding: 10px 7px;
+  border-top: 1px solid #64748b;
+}
+
+.total-footer label {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.total-footer input {
+  font-size: 14px;
+  padding: 9px 5px;
+  text-align: center;
+}
+
+.error {
+  display: none;
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.calculate-btn {
+  width: 100%;
+  padding: 15px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 9px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Result modal */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  background: rgba(15,23,42,.45);
+  backdrop-filter: blur(5px);
+}
+
+.modal.show {
+  display: flex;
+}
+
+.result-box {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 22px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.18);
+}
+
+.result-box h3 {
+  text-align: center;
+  margin: 0 0 18px;
+}
+
+.result-owner {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.result-owner h4 {
+  margin: 0 0 10px;
+  color: #1d4ed8;
+}
+
+.result-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.result-line:last-child {
+  border: 0;
+}
+
+.result-value {
+  font-weight: bold;
+  text-align: right;
+}
+
+.result-dag {
+  padding: 10px 0;
+  border-bottom: 1px dashed #cbd5e1;
+}
+
+.result-dag h5 {
+  margin: 0 0 5px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.result-total {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 2px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.result-total h5 {
+  margin: 0 0 5px;
+  padding: 8px 7px 0;
+  color: #1d4ed8;
+  font-size: 14px;
+}
+
+.result-total .result-line {
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+  /* সকল মালিকের সম্মিলিত ফলাফল */
+
+.result-all-owners {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #64748b;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.result-all-names,
+.result-all-total {
+  padding: 12px;
+  min-width: 0;
+}
+
+.result-all-names {
+  border-right: 1px solid #64748b;
+  text-align: center;
+}
+
+.result-all-names h4,
+.result-all-total h4 {
+  margin: 0 0 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #cbd5e1;
+  font-size: 14px;
+  color: #1d4ed8;
+}
+
+.result-all-names .owner-name {
+  padding: 8px 2px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.result-all-names .owner-name:last-child {
+  border-bottom: 0;
+}
+
+.result-all-total .result-line {
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.result-all-total .result-value {
+  text-align: left;
+}
+
+@media (max-width: 360px) {
+  .result-all-names,
+  .result-all-total {
+    padding: 8px;
+  }
+}
+  
+.close-btn {
+  width: 100%;
+  padding: 13px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 9px;
+  background: #172033;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>জমির খতিয়ান হিসাব করুন</h2>
+
+  <div class="subtitle">
+    খতিয়ানের অজুতাংশ থেকে শতাংশ ও কাঠায় হিসাব
+  </div>
+
+  <div class="table-scroll">
+
+    <div class="khatian">
+
+      <!-- মালিকানা -->
+      <div class="column">
+        <div class="column-heading">
+          মালিকানা
+          <small>নাম</small>
+        </div>
+
+        <textarea
+          id="ownerNames"
+          placeholder="মালিকদের নাম লিখুন"
+          spellcheck="false"
+        ></textarea>
+      </div>
+
+      <!-- অংশ -->
+      <div class="column">
+        <div class="column-heading">
+          অংশ
+        </div>
+
+        <textarea
+          id="ownerShares"
+          placeholder="হিস্যা লিখুন"
+          spellcheck="false"
+        ></textarea>
+      </div>
+
+      <!-- দাগ নম্বর -->
+      <div class="column">
+        <div class="column-heading">
+          দাগ নং
+        </div>
+
+        <textarea
+          id="dagNumbers"
+          placeholder="দাগ নম্বর"
+          spellcheck="false"
+        ></textarea>
+      </div>
+
+      <!-- অংশীদারি জমি -->
+      <div class="column">
+        <div class="column-heading">
+          অংশীদারি জমির
+          <small>পরিমাণ</small>
+        </div>
+
+        <textarea
+          id="dagLands"
+          placeholder="অজুতাংশ"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="total-footer">
+          <label for="totalLand">
+            মোট সম্পত্তির পরিমাণ:
+          </label>
+
+          <input
+            id="totalLand"
+            type="text"
+            inputmode="decimal"
+            placeholder="অজুতাংশ"
+          >
+
+          <div class="error" id="totalError"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="error" id="mainError"></div>
+
+  <button class="calculate-btn" id="calculate">
+    হিসাব করুন
+  </button>
+
+</div>
+
+<!-- Results -->
+<div class="modal" id="resultModal">
+  <div class="result-box">
+    <h3>হিসাবের ফলাফল</h3>
+    <div id="resultContent"></div>
+    <button class="close-btn" id="closeResult">
+      বন্ধ করুন
+    </button>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // গাণিতিক নিয়ম
+  const AJUTANSHO_PER_PERCENT = 100;
+  const PERCENT_PER_KATHA = 1.65;
+  const CALCULATION_TOLERANCE = 0.000000001;
+
+  const ownerNamesInput = document.getElementById("ownerNames");
+  const ownerSharesInput = document.getElementById("ownerShares");
+  const dagNumbersInput = document.getElementById("dagNumbers");
+  const dagLandsInput = document.getElementById("dagLands");
+
+  const modal = document.getElementById("resultModal");
+  const resultContent = document.getElementById("resultContent");
+
+  // বাংলা সংখ্যা ইংরেজি সংখ্যায় রূপান্তর
+  function normalizeNumber(value) {
+    const bn = "০১২৩৪৫৬৭৮৯";
+
+    return String(value)
+      .replace(/[০-৯]/g, digit => bn.indexOf(digit))
+      .trim();
+  }
+
+  // সংখ্যা যাচাই
+  function parseNumber(value) {
+    const normalized = normalizeNumber(value);
+
+    if (!/^\d+(\.\d+)?$/.test(normalized)) {
+      return null;
+    }
+
+    const number = Number(normalized);
+
+    return Number.isFinite(number) ? number : null;
+  }
+
+  // দশমিক ফলাফল
+  function formatNumber(value) {
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 4
+    });
+  }
+
+  // অজুতাংশ থেকে শতাংশ ও কাঠা
+  function convertArea(ajutansho) {
+    const percent = ajutansho / AJUTANSHO_PER_PERCENT;
+    const katha = percent / PERCENT_PER_KATHA;
+
+    return { percent, katha };
+  }
+
+  // প্রতিটি কলামের খালি লাইন বাদ দিয়ে তথ্য সংগ্রহ
+  function getColumnLines(element) {
+    return element.value
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line !== "");
+  }
+
+  function clearErrors() {
+    document.querySelectorAll(".error").forEach(error => {
+      error.textContent = "";
+      error.style.display = "none";
+    });
+  }
+
+  function showError(element, message) {
+    element.textContent = message;
+    element.style.display = "block";
+  }
+
+  // মালিক ও হিস্যা সংগ্রহ
+  function getOwners() {
+    const names = getColumnLines(ownerNamesInput);
+    const shares = getColumnLines(ownerSharesInput);
+
+    if (!names.length) {
+      showError(
+        document.getElementById("mainError"),
+        "অন্তত একজন মালিকের নাম লিখুন।"
+      );
+      ownerNamesInput.focus();
+      return null;
+    }
+
+    if (names.length !== shares.length) {
+      showError(
+        document.getElementById("mainError"),
+        "মালিকের নাম ও হিস্যার সংখ্যা সমান হতে হবে।"
+      );
+      ownerSharesInput.focus();
+      return null;
+    }
+
+    const owners = [];
+
+    for (let i = 0; i < names.length; i++) {
+      const share = parseNumber(shares[i]);
+
+      if (share === null || share <= 0 || share > 1) {
+        showError(
+          document.getElementById("mainError"),
+          `ক্রমিক ${i + 1}: ${names[i]}-এর সঠিক হিস্যা লিখুন।`
+        );
+        ownerSharesInput.focus();
+        return null;
+      }
+
+      owners.push({
+        name: names[i],
+        share
+      });
+    }
+
+    // সব মালিকের হিস্যার যোগফল ১ হতে হবে
+    const shareTotal = owners.reduce(
+      (sum, owner) => sum + owner.share, 0
+    );
+
+    if (Math.abs(shareTotal - 1) > CALCULATION_TOLERANCE) {
+      showError(
+        document.getElementById("mainError"),
+        `মালিকদের মোট হিস্যা ১ হতে হবে। বর্তমানে মোট হিস্যা ${formatNumber(shareTotal)}।`
+      );
+      ownerSharesInput.focus();
+      return null;
+    }
+
+    return owners;
+  }
+
+  // দাগ ও অজুতাংশ সংগ্রহ
+  function getDags() {
+    const numbers = getColumnLines(dagNumbersInput);
+    const lands = getColumnLines(dagLandsInput);
+
+    if (!numbers.length) {
+      showError(
+        document.getElementById("mainError"),
+        "অন্তত একটি দাগ নম্বর লিখুন।"
+      );
+      dagNumbersInput.focus();
+      return null;
+    }
+
+    if (numbers.length !== lands.length) {
+      showError(
+        document.getElementById("mainError"),
+        "দাগ নম্বর ও জমির পরিমাণের সংখ্যা সমান হতে হবে।"
+      );
+      dagLandsInput.focus();
+      return null;
+    }
+
+    const dags = [];
+
+    for (let i = 0; i < numbers.length; i++) {
+      const land = parseNumber(lands[i]);
+
+      if (land === null || land <= 0) {
+        showError(
+          document.getElementById("mainError"),
+          `ক্রমিক ${i + 1}: ${numbers[i]} নম্বর দাগের সঠিক জমির পরিমাণ লিখুন।`
+        );
+        dagLandsInput.focus();
+        return null;
+      }
+
+      dags.push({
+        number: numbers[i],
+        land
+      });
+    }
+
+    return dags;
+  }
+
+  function addResultLine(label, value) {
+    return `
+      <div class="result-line">
+        <span>${label}</span>
+        <span class="result-value">${value}</span>
+      </div>
+    `;
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
+  }
+
+  // একজন মালিকের একটি দাগের হিসাব
+  function calculateDagShare(dag, owner) {
+
+    // দাগের অজুতাংশ × মালিকের হিস্যা
+    const ajutansho = dag.land * owner.share;
+
+    // অজুতাংশ থেকে শতাংশ ও কাঠা
+    const area = convertArea(ajutansho);
+
+    return {
+      ajutansho,
+      percent: area.percent,
+      katha: area.katha
+    };
+  }
+
+  // একজন মালিকের সম্পূর্ণ খতিয়ানের হিসাব
+  function calculateOwnerTotal(totalLand, owner) {
+
+    // মোট সম্পত্তি × মালিকের হিস্যা
+    const ajutansho = totalLand * owner.share;
+
+    const area = convertArea(ajutansho);
+
+    return {
+      ajutansho,
+      percent: area.percent,
+      katha: area.katha
+    };
+  }
+
+  function calculate() {
+    clearErrors();
+
+    const owners = getOwners();
+
+    if (!owners) return;
+
+    const dags = getDags();
+
+    if (!dags) return;
+
+    // মোট সম্পত্তির পরিমাণ সংগ্রহ
+    const totalLand = parseNumber(
+      document.getElementById("totalLand").value
+    );
+
+    if (totalLand === null || totalLand <= 0) {
+      showError(
+        document.getElementById("totalError"),
+        "মোট সম্পত্তির সঠিক অজুতাংশ লিখুন।"
+      );
+      document.getElementById("totalLand").focus();
+      return;
+    }
+
+    // সব দাগের অজুতাংশ যোগ
+    const dagTotal = dags.reduce(
+      (sum, dag) => sum + dag.land, 0
+    );
+
+    // দাগগুলোর যোগফল ও মোট সম্পত্তি যাচাই
+    if (
+      Math.abs(dagTotal - totalLand) >
+      CALCULATION_TOLERANCE
+    ) {
+      showError(
+        document.getElementById("totalError"),
+        `দাগগুলোর মোট জমি ${formatNumber(dagTotal)} অজুতাংশ, কিন্তু মোট সম্পত্তি ${formatNumber(totalLand)} অজুতাংশ। পরিমাণ দুটি মিলছে না।`
+      );
+      document.getElementById("totalLand").focus();
+      return;
+    }
+
+      
+      
+let html = "";
+
+// সকল মালিকের সম্মিলিত সম্পত্তির হিসাব
+const allOwnersAjutansho = owners.reduce(
+  (sum, owner) => {
+    return sum + calculateOwnerTotal(
+      totalLand,
+      owner
+    ).ajutansho;
+  },
+  0
+);
+
+const allOwnersArea = convertArea(
+  allOwnersAjutansho
+);
+
+// সকল মালিকের নাম
+const ownerNamesHTML = owners.map(owner => `
+  <div class="owner-name">
+    ${escapeHTML(owner.name)}
+  </div>
+`).join("");
+
+// সম্মিলিত ফলাফলের কমন টেবিল
+html += `
+  <div class="result-all-owners">
+
+    <div class="result-all-names">
+      <h4>মালিকদের নাম</h4>
+      ${ownerNamesHTML}
+    </div>
+
+    <div class="result-all-total">
+      <h4>মোট সম্পত্তি</h4>
+
+      ${addResultLine(
+        "অজুতাংশ",
+        formatNumber(allOwnersAjutansho)
+      )}
+
+      ${addResultLine(
+        "শতাংশ",
+        formatNumber(allOwnersArea.percent)
+      )}
+
+      ${addResultLine(
+        "কাঠা",
+        formatNumber(allOwnersArea.katha)
+      )}
+    </div>
+
+  </div>
+`;
+
+// প্রত্যেক মালিকের পৃথক হিসাব
+owners.forEach(owner => {
+
+  // মালিকের মোট সম্পত্তির হিসাব
+  const ownerTotal = calculateOwnerTotal(
+    totalLand,
+    owner
+  );
+
+  html += `
+    <div class="result-owner">
+
+      <h4>${escapeHTML(owner.name)}</h4>
+
+      <div class="result-total">
+        <h5>খতিয়ানে মোট প্রাপ্ত জমি</h5>
+
+        ${addResultLine(
+          "অজুতাংশ",
+          formatNumber(ownerTotal.ajutansho)
+        )}
+
+        ${addResultLine(
+          "শতাংশ",
+          formatNumber(ownerTotal.percent)
+        )}
+
+        ${addResultLine(
+          "কাঠা",
+          formatNumber(ownerTotal.katha)
+        )}
+      </div>
+
+  `;
+
+  // প্রত্যেক দাগে মালিকের প্রাপ্ত জমি
+  dags.forEach(dag => {
+
+    const dagShare = calculateDagShare(
+      dag,
+      owner
+    );
+
+    html += `
+      <div class="result-dag">
+
+        <h5>দাগ নং: ${escapeHTML(dag.number)}</h5>
+
+        ${addResultLine(
+          "অজুতাংশ",
+          formatNumber(dagShare.ajutansho)
+        )}
+
+        ${addResultLine(
+          "শতাংশ",
+          formatNumber(dagShare.percent)
+        )}
+
+        ${addResultLine(
+          "কাঠা",
+          formatNumber(dagShare.katha)
+        )}
+
+      </div>
+    `;
+  });
+
+  html += `
+    </div>
+  `;
+});
+
+resultContent.innerHTML = html;
+modal.classList.add("show");
+}
+    
+  
+  
+  
+  
+  document.getElementById("calculate")
+    .addEventListener("click", calculate);
+
+  document.getElementById("closeResult")
+    .addEventListener("click", () => {
+      modal.classList.remove("show");
+    });
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      modal.classList.remove("show");
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>
